@@ -1,4 +1,12 @@
 package org.example.ringetty.handler;
 
-public class BusinessHandler {
+import com.lmax.disruptor.EventHandler;
+import org.example.ringetty.http.HttpExchangeWrapper;
+
+public class BusinessHandler implements EventHandler<HttpExchangeWrapper> {
+
+    @Override
+    public void onEvent(HttpExchangeWrapper httpExchangeWrapper, long l, boolean b) throws Exception {
+
+    }
 }

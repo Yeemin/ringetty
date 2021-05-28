@@ -1,7 +1,7 @@
 package org.example.ringetty.handler;
 
 import com.lmax.disruptor.EventHandler;
-import org.example.ringetty.http.HttpExchangeEvent;
+import org.example.ringetty.event.HttpExchangeEvent;
 
 public class BusinessHandler implements EventHandler<HttpExchangeEvent> {
 

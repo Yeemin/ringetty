@@ -1,4 +1,4 @@
-package org.example.ringetty.http;
+package org.example.ringetty.event;
 
 import com.sun.net.httpserver.HttpExchange;
 

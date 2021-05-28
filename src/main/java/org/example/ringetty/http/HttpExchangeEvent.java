@@ -2,14 +2,14 @@ package org.example.ringetty.http;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class HttpExchangeWrapper {
+public class HttpExchangeEvent {
 
     HttpExchange httpExchange;
 
-    public HttpExchangeWrapper() {
+    public HttpExchangeEvent() {
     }
 
-    public HttpExchangeWrapper(HttpExchange httpExchange) {
+    public HttpExchangeEvent(HttpExchange httpExchange) {
         this.httpExchange = httpExchange;
     }
 

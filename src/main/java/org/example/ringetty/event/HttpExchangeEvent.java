@@ -16,4 +16,8 @@ public class HttpExchangeEvent {
     public HttpExchange getHttpExchange() {
         return httpExchange;
     }
+
+    public void setHttpExchange(HttpExchange httpExchange) {
+        this.httpExchange = httpExchange;
+    }
 }

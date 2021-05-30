@@ -8,4 +8,5 @@ public class HttpExchangeEventFactory implements EventFactory<HttpExchangeEvent>
     public HttpExchangeEvent newInstance() {
         return new HttpExchangeEvent();
     }
+
 }

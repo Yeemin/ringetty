@@ -1,12 +1,12 @@
 package disruptor;
 
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.EventTranslatorOneArg;
-import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.junit.Test;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -15,6 +15,13 @@ public class DisruptorTest {
 
     class DemoEvent {
         String value;
+
+        public DemoEvent() {
+        }
+
+        public DemoEvent(String value) {
+            this.value = value;
+        }
 
         public String getValue() {
             return value;
@@ -98,7 +105,6 @@ public class DisruptorTest {
             demoEventProducer.onData("data - " + (i + 1));
         }
 
-
         try {
             Thread.sleep(10000L);
         } catch (InterruptedException e) {
@@ -140,5 +146,59 @@ public class DisruptorTest {
         );
     }
 
+    @Test
+    public void pollTest() throws Exception {
+        int size = 100;
+        int bufferSize = 1;
+        while (bufferSize < size) {
+            bufferSize <<= 1;
+        }
+        Disruptor<DemoEvent> disruptor = new Disruptor<>(DemoEvent::new, bufferSize, (ThreadFactory) Thread::new);
+        disruptor.start();
+
+        RingBuffer<DemoEvent> ringBuffer = disruptor.getRingBuffer();
+        IntStream.range(1, size + 1).boxed().forEach(integer ->
+                ringBuffer.publishEvent(DemoEventWithMethodRef::translate, "data-" + integer)
+        );
+
+        EventPoller<DemoEvent> newPoller = ringBuffer.newPoller();
+        Sequence sequence = newPoller.getSequence();
+
+        CountDownLatch countDownLatch = new CountDownLatch(size);
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < size; i++) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    DemoEvent demoEvent = ringBuffer.get(sequence.incrementAndGet());
+                    System.out.println(Thread.currentThread().getName() + ": " + demoEvent.getValue());
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+        countDownLatch.await();
+        System.out.println("elapse: " + (System.currentTimeMillis() - time));
+        Thread.sleep(1000L);
+
+        ConcurrentLinkedQueue<DemoEvent> queue = new ConcurrentLinkedQueue<>();
+        IntStream.range(1, size + 1).boxed().forEach(integer ->
+                queue.offer(new DemoEvent("data-" + integer))
+        );
+
+        CountDownLatch countDownLatch2 = new CountDownLatch(size);
+        for (int i = 0; i < size; i++) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    DemoEvent demoEvent = queue.poll();
+//                    System.out.println(Thread.currentThread().getName() + ": " + demoEvent.getValue());
+                } finally {
+                    countDownLatch2.countDown();
+                }
+            });
+        }
+        countDownLatch2.await();
+        System.out.println("elapse: " + (System.currentTimeMillis() - time));
+
+    }
 
 }

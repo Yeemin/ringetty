@@ -4,10 +4,7 @@ import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.junit.Test;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -198,7 +195,27 @@ public class DisruptorTest {
         }
         countDownLatch2.await();
         System.out.println("elapse: " + (System.currentTimeMillis() - time));
+    }
 
+    @Test
+    public void diamondTest() {
+        Disruptor<DemoEvent> disruptor = new Disruptor<>(DemoEvent::new, 1024, (ThreadFactory) Thread::new);
+
+        disruptor.handleEventsWith((event, l, b) -> System.out.println("1"), (event, l1, l2) -> System.out.println("2"))
+                .handleEventsWith((event, l, b) -> System.out.println("3"))
+                .then((event, l, b) -> System.out.println("4"));
+        RingBuffer<DemoEvent> ringBuffer = disruptor.getRingBuffer();
+        disruptor.handleEventsWith(new BatchEventProcessor<>(ringBuffer, ringBuffer.newBarrier(),
+                (event, l, b) -> System.out.println("processor")))
+        .then((event, l, b) -> System.out.println("processor"));
+
+        disruptor.start();
+        disruptor.publishEvent(((event, sequence) -> event.setValue("demo")));
+        try {
+            TimeUnit.SECONDS.sleep(1L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

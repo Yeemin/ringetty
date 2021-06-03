@@ -2,15 +2,23 @@ package org.example.ringetty.event;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import java.util.concurrent.CountDownLatch;
+
 public class HttpExchangeEvent {
 
-    HttpExchange httpExchange;
+    private HttpExchange httpExchange;
+    private CountDownLatch countDownLatch;
 
     public HttpExchangeEvent() {
     }
 
-    public HttpExchangeEvent(HttpExchange httpExchange) {
+    public HttpExchangeEvent(HttpExchange httpExchange, CountDownLatch countDownLatch) {
         this.httpExchange = httpExchange;
+        this.countDownLatch = countDownLatch;
+    }
+
+    public void onCompleted() {
+        this.countDownLatch.countDown();
     }
 
     public HttpExchange getHttpExchange() {
@@ -19,5 +27,13 @@ public class HttpExchangeEvent {
 
     public void setHttpExchange(HttpExchange httpExchange) {
         this.httpExchange = httpExchange;
+    }
+
+    public void setCountDownLatch(CountDownLatch countDownLatch) {
+        this.countDownLatch = countDownLatch;
+    }
+
+    public CountDownLatch getCountDownLatch() {
+        return countDownLatch;
     }
 }

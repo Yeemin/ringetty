@@ -8,15 +8,15 @@ import com.lmax.disruptor.dsl.Disruptor;
 import org.example.ringetty.event.HttpExchangeEvent;
 import org.example.ringetty.event.HttpExchangeEventFactory;
 
-public class ReceiveHandler implements EventHandler<HttpExchangeEvent> {
+public class DispatcherHandler implements EventHandler<HttpExchangeEvent> {
 
     private Log log = LogFactory.get();
 
     private final Disruptor<HttpExchangeEvent> disruptor = new Disruptor<>(new HttpExchangeEventFactory(),
-            1024, new NamedThreadFactory("dispatcher-", false));
+            1024, new NamedThreadFactory("send-", false));
 
-    public ReceiveHandler() {
-        this.disruptor.handleEventsWith(new DispatcherHandler());
+    public DispatcherHandler() {
+        this.disruptor.handleEventsWith(new SendHandler());
         this.disruptor.start();
     }
 

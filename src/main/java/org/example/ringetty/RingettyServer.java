@@ -2,6 +2,7 @@ package org.example.ringetty;
 
 import cn.hutool.setting.Setting;
 import org.example.ringetty.server.RingHttpServer;
+import org.example.ringetty.web.RestMappingHandler;
 
 import java.io.IOException;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 public class RingettyServer {
 
     public static void main(String[] args) throws IOException {
+        RestMappingHandler.init();
         new RingHttpServer(new Setting("http.properties"));
     }
 
